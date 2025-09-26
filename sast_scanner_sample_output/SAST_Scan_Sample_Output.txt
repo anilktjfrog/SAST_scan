@@ -1,0 +1,77 @@
+Setting JF_SAST_DEFAULT_SCAN_MODE to 'file' and JFROG_CLI_LOG_LEVEL to 'DEBUG'
+
+###############################################################
+#                  SAST SCAN AUTOMATION SCRIPT                #
+# ----------------------------------------------------------- #
+# This script automates the following steps:                  #
+#  1. Detects the version control system (Git or ClearCase)   #
+#  2. Gets a list of changed files                            #
+#  3. Copies changed files to a temporary directory           #
+#  4. Runs a JFrog SAST scan on those files                  #
+#  5. Generates a CSV report and displays results             #
+#  6. Keeps only the most recent reports, cleans up old/empty #
+#                                                             #
+# Usage: ./sast_scan.sh                                       #
+###############################################################
+
+Detected version control system: git
+
+-----------------------------------------
+Copied changed files to temporary directory: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.j3CewQ4xnP
+-----------------------------------------
+
+=========================================
+Running SAST scan and generating CSV and table output
+=========================================
+
+=========================================
+ Running JFrog SAST scan on changed files in: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.j3CewQ4xnP
+ Using 14 threads.
+=========================================
+Current directory: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat
+Changing to target directory to perform SAST scan: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.j3CewQ4xnP
+-----------------------------------------
+Executing: jf audit --sast=true --threads=14 --format simple-json > "/Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_raw_20250926_192405.json"
+-----------------------------------------
+19:24:06 [Debug] JFrog CLI version: 2.79.1
+19:24:06 [Debug] OS/Arch: darwin/arm64
+19:24:06 [Debug] Trace ID for JFrog Platform logs: e0242b7b9b35fd03
+19:24:06 [Debug] Using <psemea> server-id configuration
+19:24:06 [Debug] Sending HTTP GET request to: https://psemea.jfrog.io/xray/api/v1/system/version
+19:24:07 [Debug] Xray version: 3.127.8
+19:24:07 [Debug] Sending HTTP GET request to: https://psemea.jfrog.io/xray/api/v1/xsc/system/version
+19:24:08 [Debug] XSC version: 3.999.999
+19:24:08 [🔵Info] Log path: /Users/anilkt/.jfrog/logs/jfrog-cli.2025-09-26.19-24-08.87430.log
+
+💬 Help us improve JFrog CLI! https://www.surveymonkey.com/r/JFCLICLI
+Raw JSON scan output saved to: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_raw_20250926_192405.json
+-----------------------------------------
+Changing back to original directory: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat
+-----------------------------------------
+Total SAST issues found: 3
+-----------------------------------------
+SAST Report CSV File: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_report_20250926_192405.csv
+-----------------------------------------
+
+========== SAST Scan Results ==========
+
+SAST issues (Table Format):
+severity  file                                                        line  column  finding
+"Low"     "src/main/resources/webgoat/static/js/libs/text.js"         34    45      "Potentially slow regex pattern                                   which is not necessarily applied on untrusted input"
+"Low"     "src/it/java/org/owasp/webgoat/CryptoIntegrationTest.java"  32    7       "Internal code structure may be revealed through error message"
+"Low"     "src/it/java/org/owasp/webgoat/CryptoIntegrationTest.java"  39    7       "Internal code structure may be revealed through error message"
+=========================================
+
+SAST issues (CSV Format):
+severity,file,line,column,finding
+"Low","src/main/resources/webgoat/static/js/libs/text.js",34,45,"Potentially slow regex pattern, which is not necessarily applied on untrusted input"
+"Low","src/it/java/org/owasp/webgoat/CryptoIntegrationTest.java",32,7,"Internal code structure may be revealed through error message"
+"Low","src/it/java/org/owasp/webgoat/CryptoIntegrationTest.java",39,7,"Internal code structure may be revealed through error message"
+=========================================
+
+-----------------------------------------
+Keeping only the 2 most recent CSV reports.
+Total CSV reports: 3. Deleting older reports...
+Deleting old CSV: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_report_20250926_122110.csv as only keeping 2 most recent reports.
+Cleaning up temporary files...
+Scan complete.

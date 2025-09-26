@@ -1,0 +1,4 @@
+severity,file,line,column,finding
+"Low","src/main/resources/webgoat/static/js/libs/text.js",34,45,"Potentially slow regex pattern, which is not necessarily applied on untrusted input"
+"Low","src/it/java/org/owasp/webgoat/CryptoIntegrationTest.java",32,7,"Internal code structure may be revealed through error message"
+"Low","src/it/java/org/owasp/webgoat/CryptoIntegrationTest.java",39,7,"Internal code structure may be revealed through error message"
