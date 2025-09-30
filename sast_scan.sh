@@ -35,6 +35,135 @@ fi
 echo "Setting JF_SAST_DEFAULT_SCAN_MODE to 'file' and JFROG_CLI_LOG_LEVEL to 'DEBUG'"
 export JF_SAST_DEFAULT_SCAN_MODE=file
 export JFROG_CLI_LOG_LEVEL=DEBUG
+export JFROG_CLI_HIDE_SURVEY=true
+
+# --- Prerequisites Check ---
+
+check_prerequisites() {
+    local missing_prereqs=()
+    local optional_missing=()
+
+    echo "========================================="
+    echo "Checking prerequisites..."
+    echo "========================================="
+
+    # Check JFrog CLI
+    if ! command -v jf >/dev/null 2>&1; then
+        missing_prereqs+=("JFrog CLI (jf)")
+        echo "❌ JFrog CLI not found"
+        echo "   Install from: https://jfrog.com/getcli/"
+    else
+        echo "✅ JFrog CLI found: $(jf --version 2>/dev/null | head -1 || echo 'version unknown')"
+
+        # Check if JFrog CLI is configured
+        if ! jf config show >/dev/null 2>&1; then
+            echo "⚠️  JFrog CLI found but may not be configured"
+            echo "   Run 'jf config add' to configure your JFrog instance"
+        else
+            echo "✅ JFrog CLI appears to be configured"
+        fi
+    fi
+
+    # Check jq
+    if ! command -v jq >/dev/null 2>&1; then
+        missing_prereqs+=("jq")
+        echo "❌ jq not found"
+        echo "   On macOS: brew install jq"
+        echo "   On Ubuntu/Debian: sudo apt-get install jq"
+        echo "   On CentOS/RHEL: sudo yum install jq"
+    else
+        echo "✅ jq found: $(jq --version)"
+    fi
+
+    # Check rsync
+    if ! command -v rsync >/dev/null 2>&1; then
+        missing_prereqs+=("rsync")
+        echo "❌ rsync not found"
+        echo "   On macOS: should be pre-installed"
+        echo "   On Ubuntu/Debian: sudo apt-get install rsync"
+        echo "   On CentOS/RHEL: sudo yum install rsync"
+    else
+        echo "✅ rsync found: $(rsync --version | head -1)"
+    fi
+
+    # Check awk
+    if ! command -v awk >/dev/null 2>&1; then
+        missing_prereqs+=("awk")
+        echo "❌ awk not found"
+        echo "   Should be available on most Unix-like systems"
+    else
+        echo "✅ awk found: $(awk --version 2>/dev/null | head -1 || echo 'version unknown')"
+    fi
+
+    # Check column (optional)
+    if ! command -v column >/dev/null 2>&1; then
+        optional_missing+=("column")
+        echo "⚠️  column utility not found (optional)"
+        echo "   Table output will use raw CSV format instead"
+        echo "   On macOS: should be pre-installed"
+        echo "   On Ubuntu/Debian: sudo apt-get install bsdmainutils"
+    else
+        echo "✅ column found (optional utility for table formatting)"
+    fi
+
+    # Check git
+    if ! command -v git >/dev/null 2>&1; then
+        echo "⚠️  git not found"
+        echo "   On macOS: brew install git or install Xcode Command Line Tools"
+        echo "   On Ubuntu/Debian: sudo apt-get install git"
+        echo "   On CentOS/RHEL: sudo yum install git"
+    else
+        echo "✅ git found: $(git --version)"
+    fi
+
+    # Check cleartool
+    if ! command -v /usr/atria/bin/cleartool >/dev/null 2>&1; then
+        echo "⚠️  cleartool not found"
+        echo "   ClearCase tools not installed or not in expected location (/usr/atria/bin/)"
+        echo "   Install IBM Rational ClearCase if you need ClearCase support"
+    else
+        echo "✅ cleartool found: $(/usr/atria/bin/cleartool -version 2>/dev/null | head -1 || echo 'version unknown')"
+    fi
+
+    # Check version control access
+    local vcs_available=false
+    if git rev-parse --is-inside-work-tree &>/dev/null; then
+        echo "✅ Git repository detected"
+        vcs_available=true
+    elif /usr/atria/bin/cleartool ls &>/dev/null 2>&1; then
+        echo "✅ ClearCase repository detected"
+        vcs_available=true
+    else
+        echo "❌ No Git or ClearCase repository detected"
+        echo "   Please run this script from within a Git or ClearCase repository"
+        missing_prereqs+=("Git or ClearCase repository access")
+    fi
+
+    echo "========================================="
+
+    # Report results
+    if [ ${#missing_prereqs[@]} -gt 0 ]; then
+        echo "❌ Missing required prerequisites:"
+        for prereq in "${missing_prereqs[@]}"; do
+            echo "   - $prereq"
+        done
+        echo ""
+        echo "Please install the missing prerequisites and try again."
+        return 1
+    fi
+
+    if [ ${#optional_missing[@]} -gt 0 ]; then
+        echo "⚠️  Optional prerequisites missing (script will still work):"
+        for prereq in "${optional_missing[@]}"; do
+            echo "   - $prereq"
+        done
+        echo ""
+    fi
+
+    echo "✅ All required prerequisites are met!"
+    echo "========================================="
+    return 0
+}
 
 # --- Functions ---
 
@@ -42,7 +171,7 @@ export JFROG_CLI_LOG_LEVEL=DEBUG
 detect_vcs() {
     if git rev-parse --is-inside-work-tree &>/dev/null; then
         echo "git"
-    elif cleartool ls &>/dev/null; then
+    elif /usr/atria/bin/cleartool ls &>/dev/null; then
         echo "clearcase"
     else
         echo "unknown"
@@ -51,18 +180,46 @@ detect_vcs() {
 
 # Function to get changed files from a Git repository
 get_git_changes() {
-    git status --porcelain | awk '{print $2}'
+    local files=($(git status --porcelain | awk '{print $2}'))
+
+    # Print all files with serial numbers
+    if [ ${#files[@]} -gt 0 ]; then
+        echo "Git changed files:" >&2
+        for i in "${!files[@]}"; do
+            echo "$((i+1)). ${files[$i]}" >&2
+        done
+    fi
+
+    # Return the files
+    printf '%s\n' "${files[@]}"
 }
 
-# Function to get changed files from a ClearCase repository
-# NOT TESTED
+############################################ Function to get changed files from a ClearCase repository
 get_clearcase_changes() {
-    cleartool ls -short | while read -r line; do
-        cleartool describe "$line" | grep "CHECKEDOUT" &>/dev/null
-        if [ $? -eq 0 ]; then
-            echo "$line"
-        fi
-    done
+    # First, get the current branch name
+    local branch=$(/usr/atria/bin/cleartool catcs | awk '/\.\.\.\/\/ {sub(/.*\.\.\.\/\//,""); sub(/\/LATEST.*/,""); print; exit}')
+
+    # Check if we got a valid branch name (not "lost+found -none")
+    if [ -z "$branch" ] || [[ "$branch" == *"lost+found"* ]]; then
+        echo "Error: No proper ClearCase view is set or invalid branch detected: $branch" >&2
+        return 1
+    fi
+
+    echo "Detected ClearCase branch: $branch" >&2
+
+    # Find all modified files on the current branch (both checked out and checked in)
+    local files=($(/usr/atria/bin/cleartool find -avobs -type f -ver "{brtype($branch)}" -nxn -print))
+
+    # Print all files with serial numbers
+    if [ ${#files[@]} -gt 0 ]; then
+        echo "ClearCase changed files:" >&2
+        for i in "${!files[@]}"; do
+            echo "$((i+1)). ${files[$i]}" >&2
+        done
+    fi
+
+    # Return the files
+    printf '%s\n' "${files[@]}"
 }
 
 # Function to run the SAST scan
@@ -209,6 +366,12 @@ main() {
     echo "# Usage: ./sast_scan.sh                                       #"
     echo "###############################################################"
     echo ""
+
+    # Check prerequisites first
+    if ! check_prerequisites; then
+        echo "Exiting due to missing prerequisites."
+        exit 1
+    fi
 
     VCS=$(detect_vcs)
 

@@ -14,10 +14,32 @@ Setting JF_SAST_DEFAULT_SCAN_MODE to 'file' and JFROG_CLI_LOG_LEVEL to 'DEBUG'
 # Usage: ./sast_scan.sh                                       #
 ###############################################################
 
+=========================================
+Checking prerequisites...
+=========================================
+✅ JFrog CLI found: jf version 2.79.2
+✅ JFrog CLI appears to be configured
+✅ jq found: jq-1.8.1
+✅ rsync found: openrsync: protocol version 29
+✅ awk found: awk version 20200816
+✅ column found (optional utility for table formatting)
+✅ Git repository detected
+=========================================
+✅ All required prerequisites are met!
+=========================================
 Detected version control system: git
+Git changed files:
+1. src/it/java/org/owasp/webgoat/CryptoIntegrationTest.java
+2. src/main/java/org/owasp/webgoat/lessons/jwt/JWTRefreshEndpoint.java
+3. src/main/resources/webgoat/static/js/libs/text.js
+4. sast_report.json
+5. sast_report.txt
+6. sast_reports/
+7. sast_scan.sh
+8. sast_scan_1.sh
 
 -----------------------------------------
-Copied changed files to temporary directory: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.j3CewQ4xnP
+Copied changed files to temporary directory: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.kcmr1y8j96
 -----------------------------------------
 
 =========================================
@@ -25,32 +47,30 @@ Running SAST scan and generating CSV and table output
 =========================================
 
 =========================================
- Running JFrog SAST scan on changed files in: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.j3CewQ4xnP
+ Running JFrog SAST scan on changed files in: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.kcmr1y8j96
  Using 14 threads.
 =========================================
 Current directory: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat
-Changing to target directory to perform SAST scan: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.j3CewQ4xnP
+Changing to target directory to perform SAST scan: /var/folders/bh/bnzt8syx04l3m3g2v2jkm8780000gp/T/tmp.kcmr1y8j96
 -----------------------------------------
-Executing: jf audit --sast=true --threads=14 --format simple-json > "/Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_raw_20250926_192405.json"
+Executing: jf audit --sast=true --threads=14 --format simple-json > "/Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_raw_20250930_111317.json"
 -----------------------------------------
-19:24:06 [Debug] JFrog CLI version: 2.79.1
-19:24:06 [Debug] OS/Arch: darwin/arm64
-19:24:06 [Debug] Trace ID for JFrog Platform logs: e0242b7b9b35fd03
-19:24:06 [Debug] Using <psemea> server-id configuration
-19:24:06 [Debug] Sending HTTP GET request to: https://psemea.jfrog.io/xray/api/v1/system/version
-19:24:07 [Debug] Xray version: 3.127.8
-19:24:07 [Debug] Sending HTTP GET request to: https://psemea.jfrog.io/xray/api/v1/xsc/system/version
-19:24:08 [Debug] XSC version: 3.999.999
-19:24:08 [🔵Info] Log path: /Users/anilkt/.jfrog/logs/jfrog-cli.2025-09-26.19-24-08.87430.log
-
-💬 Help us improve JFrog CLI! https://www.surveymonkey.com/r/JFCLICLI
-Raw JSON scan output saved to: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_raw_20250926_192405.json
+11:13:17 [Debug] JFrog CLI version: 2.79.2
+11:13:17 [Debug] OS/Arch: darwin/arm64
+11:13:17 [Debug] Trace ID for JFrog Platform logs: ab0c3d5c31609e02
+11:13:17 [Debug] Using <psemea> server-id configuration
+11:13:17 [Debug] Sending HTTP GET request to: https://psemea.jfrog.io/xray/api/v1/system/version
+11:13:18 [Debug] Xray version: 3.127.8
+11:13:18 [Debug] Sending HTTP GET request to: https://psemea.jfrog.io/xray/api/v1/xsc/system/version
+11:13:18 [Debug] XSC version: 3.999.999
+11:13:18 [🔵Info] Log path: /Users/anilkt/.jfrog/logs/jfrog-cli.2025-09-30.11-13-18.15883.log
+Raw JSON scan output saved to: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_raw_20250930_111317.json
 -----------------------------------------
 Changing back to original directory: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat
 -----------------------------------------
 Total SAST issues found: 3
 -----------------------------------------
-SAST Report CSV File: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_report_20250926_192405.csv
+SAST Report CSV File: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_report_20250930_111317.csv
 -----------------------------------------
 
 ========== SAST Scan Results ==========
@@ -70,8 +90,8 @@ severity,file,line,column,finding
 =========================================
 
 -----------------------------------------
-Keeping only the 2 most recent CSV reports.
-Total CSV reports: 3. Deleting older reports...
-Deleting old CSV: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_report_20250926_122110.csv as only keeping 2 most recent reports.
+Keeping only the 5 most recent CSV reports.
+Total CSV reports: 6. Deleting older reports...
+Deleting old CSV: /Users/anilkt/Documents/AnilKT-Docs/GIT_PROJECTS/GITHUB/java-webgoat/sast_reports/sast_report_20250930_110209.csv as only keeping 5 most recent reports.
 Cleaning up temporary files...
 Scan complete.
