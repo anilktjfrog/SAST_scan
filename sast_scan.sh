@@ -423,7 +423,7 @@ main() {
 
     # Clean up the temporary directory
     echo "Cleaning up temporary files..."
-    #rm -rf "$TMP_DIR"
+    rm -rf "$TMP_DIR"
     echo "Scan complete."
 }
 
